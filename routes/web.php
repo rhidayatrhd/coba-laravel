@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\PostController;
+use App\Models\Category;
 use App\Models\Post;
+use App\Models\User;
+use Illuminate\Routing\Route as RoutingRoute;
 use Illuminate\Support\Facades\Route;
 use PhpParser\Node\Stmt\If_;
 
@@ -37,6 +40,32 @@ Route::get('/about', function () {
 
 
 
-Route::get('/blog', [PostController::class, 'index']);
+Route::get('/posts', [PostController::class, 'index']);
+
+
 // Halaman single post
-Route::get('/posts/{slug}', [PostController::class, 'show']);
+Route::get('/posts/{post:slug}', [PostController::class, 'show']);
+
+Route::get('/categories', function () {
+    return view('categories', [
+        'title' => 'Post Categories',
+        'categories' => Category::all()
+    ]);
+});
+
+
+Route::get('/categories/{category:slug}', function (Category $category) {
+    return view('posts', [
+        'title' => "Post by Category : $category->name",
+        'posts' => $category->posts,
+        'category' => $category->posts->load('author', 'category'),
+    ]);
+});
+
+
+Route::get('/authors/{author:username}', function (User $author) {
+    return view('posts', [
+        'title' => "Post by Author : $author->name",
+        'posts' => $author->posts->load('author', 'category'),
+    ]);
+});
